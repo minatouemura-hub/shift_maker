@@ -28,7 +28,7 @@ jobs:
 
       - name: Build EXE with PyInstaller
         run: |
-          pyinstaller --onefile --noconsole --name=app-name main.py
+          pyinstaller --onefile --noconsole --name=shift_maker main.py
 
       - name: Upload EXE as artifact
         uses: actions/upload-artifact@v3
