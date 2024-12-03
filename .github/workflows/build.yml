@@ -33,5 +33,5 @@ jobs:
       - name: Upload EXE as artifact
         uses: actions/upload-artifact@v3
         with:
-          name: app-name
-          path: dist/app-name.exe  # distディレクトリに出力されたexeファイルをアップロード
+          name: shift_maker
+          path: dist/shift_maker.exe  # distディレクトリに出力されたexeファイルをアップロード
