@@ -29,7 +29,7 @@ jobs:
           python ./waf distclean all
           pip install wheel
           cd ../
-          python setup.py install
+          pip install .
 
 
       - name: Install dependencies from requirements.txt
