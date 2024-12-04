@@ -28,8 +28,8 @@ jobs:
           cd pyinstaller/bootloader
           python ./waf distclean all
           pip install wheel
-          cd pyinstaller
-          pip install . 
+          cd ../
+          python setup.py install
 
 
       - name: Install dependencies from requirements.txt
