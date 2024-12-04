@@ -28,7 +28,7 @@ jobs:
 
       - name: Build EXE with PyInstaller
         run: |
-          pyinstaller --onefile --noconsole --hidden-import='pandas._libs.tslibs.timedeltas' --name=shift_maker main.py
+          pyinstaller --onefile --noconsole --hidden-import='pandas' --hidden-import='pandas._libs.tslibs.timedeltas'  --name=shift_maker main.py
 
       - name: Upload EXE as artifact
         uses: actions/upload-artifact@v3
