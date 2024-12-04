@@ -10,28 +10,33 @@ on:
 
 jobs:
   build:
-    runs-on: windows-latest  # Windowsランナーを指定
+    runs-on: windows-latest  # Windows ランナーを指定
 
     steps:
+      # コードをチェックアウト
       - name: Checkout code
         uses: actions/checkout@v3
 
+      # Python環境をセットアップ
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
           python-version: '3.10'  # 必要に応じてPythonのバージョンを指定
 
-      - name: Install PyInstaller
+      # 必要な依存関係をインストール
+      - name: Install dependencies
         run: |
-          pip install --upgrade pip
-          pip install pyinstaller
+          python -m pip install --upgrade pip
+          pip install pyinstaller pandas
 
-      - name: Build EXE with PyInstaller
+      # specファイルを使用してEXEをビルド
+      - name: Build EXE using spec file
         run: |
-          pyinstaller --onefile --noconsole --hidden-import='pandas' --hidden-import='pandas._libs.tslibs.timedeltas'  --name=shift_maker main.py
+          pyinstaller shift_maker.spec
 
+      # アーティファクトをアップロード
       - name: Upload EXE as artifact
         uses: actions/upload-artifact@v3
         with:
           name: shift_maker
-          path: dist/shift_maker.exe  # distディレクトリに出力されたexeファイルをアップロード
+          path: dist/shift_maker.exe  # distディレクトリに生成されたEXEファイルをアップロード
