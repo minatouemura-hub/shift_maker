@@ -14,7 +14,6 @@ a = Analysis(['main.py'],
 # 作成者情報をバージョンリソースに埋め込む
 exe = EXE(a.pure, a.binaries, a.scripts,a.datas,a.zipfiles, [],
           name='shift_maker',
-          version='0.0.1',
           author='Uemura Minato',  # 作成者名を指定# 会社名を指定
           description='Shift Maker Application',  # アプリケーションの説明
           icon=None,  # アイコンの設定が必要であれば指定
