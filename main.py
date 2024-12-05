@@ -1,36 +1,50 @@
 import calendar
 import re
 import tkinter as tk
+import traceback
+from datetime import datetime
 from tkinter import filedialog, messagebox
 
+import chardet  # エンコーディング自動検出用
 import pandas as pd
 
 
+def detect_encoding(file_path):
+    """ファイルのエンコーディングを検出"""
+    with open(file_path, "rb") as f:
+        result = chardet.detect(f.read())
+    return result["encoding"]
+
+
 def get_days_in_month(year, month):
-    # 指定された年月の月初めの日から月末までの日数を取得
+    """指定された年月の日数を取得"""
     _, days_in_month = calendar.monthrange(year, month)
-    # 日数のリストを生成
-    days_list = list(range(1, days_in_month + 1))
-    return days_list
+    return list(range(1, days_in_month + 1))
 
 
 def csv2xlsx(input_path, target_month, output_path):
+    if ".xlsx" not in output_path:
+        output_path = output_path + ".xlsx"
     try:
-        inp_data_gen = pd.read_csv(input_path)
+        # 入力ファイルのエンコーディングを検出して読み込む
+        encoding = detect_encoding(input_path)
+        inp_data_gen = pd.read_csv(input_path, encoding=encoding)
+
         out_data = pd.DataFrame()
         out_data["名前"] = inp_data_gen["お名前"]
-        target_year = 2024
+        target_year = datetime.now().year
 
         day_list = get_days_in_month(year=target_year, month=target_month)
         for day in day_list:
             out_data[day] = None
+
         # 最初[タイムスタンプ]と最後[連絡事項]を除外
-        inp_data = inp_data_gen.iloc[:, 1:-1]
+        inp_data = inp_data_gen.iloc[:, 1:-1]  # 0列目には名前
 
         # 日ごとに処理
-        for col in range(len(inp_data.columns[1:])):
+        for col in range(1, len(inp_data.columns[1:]), 1):
             for ind in range(len(inp_data.index)):
-                if pd.isna(inp_data.loc[ind, col]):
+                if pd.isna(inp_data.iloc[ind, col]):
                     continue
                 possible_times = re.split(",|:|;", inp_data.iloc[ind, col])
                 alterd_time = replace_uni(possible_times)
@@ -39,11 +53,13 @@ def csv2xlsx(input_path, target_month, output_path):
         out_data["連絡事項"] = inp_data_gen["連絡事項：コメント"]
         out_data.to_excel(output_path, index=False)
         messagebox.showinfo("完了", "処理が完了しました！")
-    except Exception as e:
-        messagebox.showerror("エラー", f"エラーが発生しました: {e}")
+    except Exception as e:  # noqa
+        error_details = traceback.format_exc()  # 詳細なエラーメッセージを取得
+        messagebox.showerror("エラー", f"エラーが発生しました:\n{error_details}")
 
 
 def replace_uni(a_list):
+    """数値を丸囲み文字に変換"""
     time = ""
     for a in a_list:
         if int(a) == 1:
@@ -78,7 +94,7 @@ def main():
         try:
             target_month = int(month_entry.get())
             if file_path and output_path:
-                csv2xlsx(file_path, target_month, output_path)
+                csv2xlsx(str(file_path), target_month, str(output_path))
         except ValueError:
             messagebox.showerror("エラー", "月は数字で入力してください！")
 

@@ -1,2 +1,3 @@
 pandas==1.5.3
 PySimpleGUI==5.0.7
+chardet==5.2.0
