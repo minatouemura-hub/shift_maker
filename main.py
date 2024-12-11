@@ -7,13 +7,20 @@ from tkinter import filedialog, messagebox
 
 import chardet  # エンコーディング自動検出用
 import pandas as pd
+from charset_normalizer import detect as charset_detect
 
 
 def detect_encoding(file_path):
     """ファイルのエンコーディングを検出"""
     with open(file_path, "rb") as f:
-        result = chardet.detect(f.read())
-    return result["encoding"]
+        raw_data = f.read()
+        # charset_normalizer を優先
+        result = charset_detect(raw_data)
+        if result["confidence"] >= 0.8:  # 信頼度が高い場合
+            return result["encoding"]
+        # 信頼度が低い場合は chardet にフォールバック
+        result = chardet.detect(raw_data)
+        return result["encoding"]
 
 
 def get_days_in_month(year, month):
@@ -26,9 +33,12 @@ def csv2xlsx(input_path, target_month, output_path):
     if ".xlsx" not in output_path:
         output_path = output_path + ".xlsx"
     try:
-        # 入力ファイルのエンコーディングを検出して読み込む
-        encoding = detect_encoding(input_path)
-        inp_data_gen = pd.read_csv(input_path, encoding=encoding)
+        try:
+            # 入力ファイルのエンコーディングを検出して読み込む
+            encoding = detect_encoding(input_path)
+            inp_data_gen = pd.read_csv(input_path, encoding=encoding)
+        except UnicodeDecodeError:
+            input_path = pd.read_csv(input_path, encoding="shift_jis")
 
         out_data = pd.DataFrame()
         out_data["名前"] = inp_data_gen["お名前"]
